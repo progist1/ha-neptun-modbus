@@ -195,6 +195,14 @@
           "not_connected": "Not connected or ground broken"
         }
       },
+      "link_state": {
+        "name": "Link state",
+        "state": {
+          "connected": "Connected",
+          "degraded": "Degraded (some data is missing)",
+          "disconnected": "Disconnected"
+        }
+      },
       "last_success": {
         "name": "Last successful poll"
       },

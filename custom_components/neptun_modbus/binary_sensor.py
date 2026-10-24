@@ -145,6 +145,13 @@ class NeptunConnectionSensor(NeptunLinkEntity, BinarySensorEntity):
     def is_on(self) -> bool:
         return self.coordinator.link_ok
 
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return {
+            "link_state": self.coordinator.link_state,
+            "block_errors": {k: v for k, v in self.coordinator.block_errors.items() if v},
+        }
+
 
 class NeptunWiredLineSensor(NeptunWiredEntity, BinarySensorEntity):
     """State of a wired input line; meaning depends on the configured line mode."""
@@ -177,6 +184,12 @@ class NeptunRadioLeak(NeptunRadioEntity, BinarySensorEntity):
 
     def __init__(self, coordinator: NeptunCoordinator, index: int) -> None:
         super().__init__(coordinator, index, "leak")
+
+    @property
+    def available(self) -> bool:
+        """A lost sensor says nothing about water, unless it reported a leak before it was lost."""
+        radio = self.coordinator.radio(self._index)
+        return super().available and radio is not None and (not radio.lost or radio.leak)
 
     @property
     def is_on(self) -> bool:

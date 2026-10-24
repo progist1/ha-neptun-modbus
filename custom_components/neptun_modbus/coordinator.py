@@ -14,7 +14,7 @@ from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
-from .client import NeptunClient, NeptunError
+from .client import NeptunClient, NeptunConnectionError, NeptunError, NeptunTimeoutError
 from .const import (
     CONF_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
@@ -65,6 +65,7 @@ class NeptunCoordinator(DataUpdateCoordinator[Blocks]):
         self.consecutive_failures = 0
         self.last_success: object | None = None
         self.last_error: str | None = None
+        self.block_errors: dict[str, str | None] = {}
         self._down_since: float | None = None
         self._radio_missing: dict[int, int] = {}
         self.radio_indexes: set[int] = set()
@@ -74,6 +75,15 @@ class NeptunCoordinator(DataUpdateCoordinator[Blocks]):
     @property
     def link_ok(self) -> bool:
         return self.last_update_success and self.consecutive_failures < FAIL_THRESHOLD
+
+    @property
+    def link_state(self) -> str:
+        """connected: all blocks read, degraded: some do not answer, disconnected: none."""
+        if not self.link_ok:
+            return "disconnected"
+        if self.data is not None and not all(self.data.ok.values()):
+            return "degraded"
+        return "connected"
 
     def block_ok(self, block: str) -> bool:
         return self.link_ok and self.data is not None and self.data.ok.get(block, False)
@@ -93,16 +103,31 @@ class NeptunCoordinator(DataUpdateCoordinator[Blocks]):
         }
         previous = self.data
         new = Blocks()
+        any_ok = False
+        dead_reason: str | None = None
         for name, reader in readers.items():
-            try:
-                setattr(new, name, await reader())
-                new.ok[name] = True
-            except NeptunError as err:
-                new.ok[name] = False
-                self.last_error = str(err)
-                _LOGGER.debug("block %s failed: %s", name, err)
-                if previous is not None:
-                    setattr(new, name, getattr(previous, name))
+            if dead_reason is not None:
+                # the first block got no answer at all: the module is gone, do not burn the cycle
+                error: str | None = dead_reason
+            else:
+                try:
+                    setattr(new, name, await reader())
+                    new.ok[name] = True
+                    self.block_errors[name] = None
+                    any_ok = True
+                    continue
+                except (NeptunTimeoutError, NeptunConnectionError) as err:
+                    error = str(err)
+                    if not any_ok:
+                        dead_reason = error
+                except NeptunError as err:
+                    error = str(err)
+                _LOGGER.debug("block %s failed: %s", name, error)
+            new.ok[name] = False
+            self.block_errors[name] = error
+            self.last_error = error
+            if previous is not None:
+                setattr(new, name, getattr(previous, name))
 
         if not any(new.ok.values()):
             self.consecutive_failures += 1
@@ -114,7 +139,8 @@ class NeptunCoordinator(DataUpdateCoordinator[Blocks]):
 
         self.consecutive_failures = 0
         self.last_success = dt_util.utcnow()
-        self.last_error = None
+        if all(new.ok.values()):
+            self.last_error = None
         self._mark_up()
         if new.ok["holding"]:
             self._track_radios(new)

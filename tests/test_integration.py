@@ -79,12 +79,20 @@ async def test_leak_and_errors(hass, setup, module):
     assert state(hass, "binary_sensor.neptun_ups_charge_low") == STATE_ON
 
 
-async def test_lost_radio_keeps_leak_available(hass, setup, module):
+async def test_lost_radio_dry_is_unknown_not_dry(hass, setup, module):
+    # no news from a sensor is not the same as "no water"
     module.set_radio(13, 0x8D | 0x20)
     await setup.runtime_data.async_refresh()
     await hass.async_block_till_done()
     assert state(hass, "binary_sensor.neptun_radio_sensor_13_lost") == STATE_ON
-    assert state(hass, "binary_sensor.neptun_radio_sensor_13_leak") == STATE_OFF
+    assert state(hass, "binary_sensor.neptun_radio_sensor_13_leak") == STATE_UNAVAILABLE
+
+
+async def test_lost_radio_that_was_leaking_stays_on(hass, setup, module):
+    module.set_radio(13, 0x8D | 0x20 | 0x10)
+    await setup.runtime_data.async_refresh()
+    await hass.async_block_till_done()
+    assert state(hass, "binary_sensor.neptun_radio_sensor_13_leak") == STATE_ON
 
 
 async def test_wrong_device_type(hass, entry, module):
@@ -256,3 +264,48 @@ async def test_wired_line_leak(hass, setup, module):
         hass.states.get("binary_sensor.neptun_wired_line_1_state").attributes["device_class"]
         == "moisture"
     )
+
+
+async def test_dead_module_costs_one_block_per_cycle(hass, setup, module):
+    coordinator = setup.runtime_data
+    module.silent = True
+    before = coordinator.client.stats.requests
+    await coordinator.async_refresh()
+    # coils is tried (retries attempts), the other three blocks are skipped
+    assert coordinator.client.stats.requests - before == 2
+    assert coordinator.block_errors["input"] is not None
+
+
+async def test_degraded_link_is_visible(hass, setup, module):
+    coordinator = setup.runtime_data
+    module.silent_functions = {"read_holding_registers"}
+    await coordinator.async_refresh()
+    await hass.async_block_till_done()
+    assert coordinator.link_state == "degraded"
+    assert coordinator.last_error  # not wiped by the other blocks that answered
+    assert state(hass, "sensor.neptun_link_state") == "degraded"
+    assert state(hass, "binary_sensor.neptun_connection") == STATE_ON
+    attrs = hass.states.get("sensor.neptun_link_state").attributes
+    assert "holding" in attrs and "coils" not in attrs
+    module.silent_functions = set()
+    await coordinator.async_refresh()
+    await hass.async_block_till_done()
+    assert state(hass, "sensor.neptun_link_state") == "connected"
+    assert coordinator.last_error is None
+
+
+async def test_link_state_disconnected(hass, setup, module):
+    coordinator = setup.runtime_data
+    module.silent = True
+    for _ in range(FAIL_THRESHOLD):
+        await coordinator.async_refresh()
+    await hass.async_block_till_done()
+    assert state(hass, "sensor.neptun_link_state") == "disconnected"
+
+
+async def test_unload_and_set_up_again_on_same_port(hass, setup, module):
+    assert await hass.config_entries.async_unload(setup.entry_id)
+    await hass.async_block_till_done()
+    assert await hass.config_entries.async_setup(setup.entry_id)
+    await hass.async_block_till_done()
+    assert state(hass, "valve.neptun_valves") == "open"

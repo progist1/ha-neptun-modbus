@@ -67,6 +67,7 @@ class NeptunClient:
             retries=0,
         )
         self._lock = asyncio.Lock()
+        self._paused = False
         self.stats = ClientStats()
 
     @property
@@ -83,6 +84,15 @@ class NeptunClient:
 
     async def close(self) -> None:
         self._client.close()
+
+    async def pause(self) -> None:
+        """Release the port and refuse requests until resume() (waits for a request in flight)."""
+        async with self._lock:
+            self._paused = True
+            self._client.close()
+
+    def resume(self) -> None:
+        self._paused = False
 
     async def read_coils(self, address: int, count: int) -> list[bool]:
         rr = await self._call(self._client.read_coils, address, count=count)
@@ -118,6 +128,8 @@ class NeptunClient:
     ) -> Any:
         last: Exception | None = None
         for attempt in range(1, self._retries + 1):
+            if self._paused:
+                raise NeptunConnectionError("port is released for reconfiguration")
             if not self._client.connected:
                 self.stats.reconnects += 1
                 await self.connect()
@@ -131,12 +143,14 @@ class NeptunClient:
                 self.stats.timeouts += 1
                 last = err
                 _LOGGER.debug("attempt %d/%d failed: %s", attempt, self._retries, err)
-                await asyncio.sleep(RETRY_PAUSE * attempt)
+                if attempt < self._retries:
+                    await asyncio.sleep(RETRY_PAUSE * attempt)
                 continue
             except (TimeoutError, ModbusException) as err:
                 self.stats.timeouts += 1
                 last = err
-                await asyncio.sleep(RETRY_PAUSE * attempt)
+                if attempt < self._retries:
+                    await asyncio.sleep(RETRY_PAUSE * attempt)
                 continue
             except OSError as err:
                 self._client.close()

@@ -65,6 +65,13 @@ In the integration options you can change:
   mode "Not used" and switches it back to "Sensor" at once.
 - The module does not count a simple contact sensor. "Sensor count" and "Close valves on wired sensor loss"
   do not work with it, but the leak itself is detected.
+- A radio sensor that lost its connection shows "Unavailable", not "Dry": no data does not mean no water.
+  The exception is a sensor that had already reported a leak: that stays "Leak".
+- The module reports the battery of radio sensors in four steps, so 0, 33, 67 and 100 percent is an estimate.
+- The valve state comes from the controller's command ("open or opening" or "closed or closing"), not from a
+  position sensor. The actual position is shown by "Valve line" when feedback is enabled.
+- "Link state" shows whether the module answers fully, partially (some data cannot be read) or not at all.
+  The reasons per data block are in the attributes and in the diagnostics.
 - The module ignores some writes, for example "Relay" outside the manual mode. Home Assistant always shows
   what the module accepted.
 

@@ -23,7 +23,9 @@ async def async_get_config_entry_diagnostics(
             "last_success": coordinator.last_success.isoformat()
             if coordinator.last_success
             else None,
+            "state": coordinator.link_state,
             "last_error": coordinator.last_error,
+            "block_errors": dict(coordinator.block_errors),
             "requests": stats.requests,
             "timeouts": stats.timeouts,
             "exceptions": stats.exceptions,

@@ -185,6 +185,26 @@ class NeptunLinkSensor(NeptunLinkEntity, SensorEntity):
         return self._value_fn(self.coordinator)
 
 
+class NeptunLinkStateSensor(NeptunLinkEntity, SensorEntity):
+    """connected / degraded (some register blocks do not answer) / disconnected."""
+
+    _attr_translation_key = "link_state"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = ["connected", "degraded", "disconnected"]
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, coordinator: NeptunCoordinator) -> None:
+        super().__init__(coordinator, "link_state")
+
+    @property
+    def native_value(self) -> str:
+        return self.coordinator.link_state
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return {k: v for k, v in self.coordinator.block_errors.items() if v}
+
+
 class NeptunRadioBattery(NeptunRadioEntity, SensorEntity):
     _attr_translation_key = "radio_battery"
     _attr_device_class = SensorDeviceClass.BATTERY
@@ -236,6 +256,7 @@ async def async_setup_entry(
                 lambda c: c.last_success,
                 SensorDeviceClass.TIMESTAMP,
             ),
+            NeptunLinkStateSensor(coordinator),
             NeptunLinkSensor(coordinator, "failures", lambda c: c.consecutive_failures),
             NeptunLinkSensor(coordinator, "timeouts", lambda c: c.client.stats.timeouts),
             NeptunLinkSensor(coordinator, "exceptions", lambda c: c.client.stats.exceptions),

@@ -84,3 +84,30 @@ async def test_writes(client, module):
     await client.write_registers(7, [0, 0, 0])
     assert module.coils[8] is False
     assert module.holding[0x49] == 7
+
+
+async def test_pause_blocks_requests_and_releases_the_port(client, module):
+    await client.connect()
+    await client.pause()
+    assert not client.connected
+    with pytest.raises(NeptunConnectionError):
+        await client.read_coils(0, 1)
+    client.resume()
+    assert len(await client.read_coils(0, 9)) == 9  # reconnects by itself
+
+
+async def test_no_sleep_after_last_attempt(client, module, monkeypatch):
+    from custom_components.neptun_modbus import client as client_module
+
+    sleeps = []
+
+    async def fake_sleep(delay):
+        sleeps.append(delay)
+
+    monkeypatch.setattr(client_module, "RETRY_PAUSE", 0.2)
+    monkeypatch.setattr(client_module.asyncio, "sleep", fake_sleep)
+    await client.connect()
+    module.silent = True
+    with pytest.raises(NeptunTimeoutError):
+        await client.read_coils(0, 1)
+    assert len(sleeps) == 2  # 3 attempts -> pauses only between them

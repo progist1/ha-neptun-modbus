@@ -136,9 +136,14 @@ class NeptunConfigFlow(ConfigFlow, domain=DOMAIN):
             user_input = _normalize(user_input)
             runtime = getattr(entry, "runtime_data", None)
             if runtime is not None:
-                # only one process may own the port: release it before probing
-                await runtime.client.close()
-            if (error := await _validate(self.hass, user_input)) is None:
+                # only one process may own the port: stop the poller from reopening it while probing
+                await runtime.client.pause()
+            try:
+                error = await _validate(self.hass, user_input)
+            finally:
+                if runtime is not None:
+                    runtime.client.resume()
+            if error is None:
                 real = await self.hass.async_add_executor_job(
                     os.path.realpath, user_input[CONF_PORT]
                 )
