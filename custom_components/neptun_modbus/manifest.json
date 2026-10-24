@@ -9,5 +9,5 @@
   "issue_tracker": "https://github.com/progist1/ha-neptun-modbus/issues",
   "loggers": ["pymodbus"],
   "requirements": ["pymodbus>=3.13.1", "pyserial>=3.5"],
-  "version": "0.1.0"
+  "version": "0.1.1"
 }
