@@ -1,0 +1,293 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Neptun module",
+        "description": "RS-485 adapter and Modbus address of the module. The port is opened by Home Assistant exclusively; 8N1.",
+        "data": {
+          "port": "Serial port",
+          "slave": "Modbus address",
+          "baudrate": "Baud rate"
+        }
+      },
+      "reconfigure": {
+        "title": "Connection settings",
+        "description": "Changes how Home Assistant talks to the module; the module's own settings stay as they are.",
+        "data": {
+          "port": "Serial port",
+          "slave": "Modbus address",
+          "baudrate": "Baud rate"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot open the port or the module does not answer",
+      "timeout": "The module did not answer in time",
+      "permission": "No permission to access the serial port",
+      "not_neptun": "The device is not a Neptun module"
+    },
+    "abort": {
+      "already_configured": "This module is already configured",
+      "reconfigure_successful": "Connection settings updated"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Polling",
+        "data": {
+          "scan_interval": "Poll interval (s)",
+          "timeout": "Request timeout (s)",
+          "retries": "Attempts per request",
+          "valve_lines": "Valve lines in use"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "leak": {
+        "name": "Leak"
+      },
+      "siren_active": {
+        "name": "Siren"
+      },
+      "valves_power": {
+        "name": "Valves power"
+      },
+      "ups_present": {
+        "name": "UPS present"
+      },
+      "on_ups": {
+        "name": "Running on UPS"
+      },
+      "problem": {
+        "name": "Problem"
+      },
+      "connection": {
+        "name": "Connection"
+      },
+      "wired_line": {
+        "name": "State"
+      },
+      "radio_leak": {
+        "name": "Leak"
+      },
+      "radio_lost": {
+        "name": "Lost"
+      },
+      "error_short_modules_power": {
+        "name": "Short circuit on modules power"
+      },
+      "error_short_wired_power": {
+        "name": "Short circuit on wired sensors power"
+      },
+      "error_short_valves_power": {
+        "name": "Short circuit on valves power"
+      },
+      "error_valves_stuck": {
+        "name": "Valves stuck"
+      },
+      "error_lora_unavailable": {
+        "name": "LoRa chip unavailable"
+      },
+      "error_eeprom_unavailable": {
+        "name": "EEPROM unavailable"
+      },
+      "error_ups_low": {
+        "name": "UPS charge low"
+      }
+    },
+    "button": {
+      "reset_leak": {
+        "name": "Reset leak"
+      },
+      "mute_siren": {
+        "name": "Mute siren"
+      },
+      "save_wired_count": {
+        "name": "Save sensor count"
+      },
+      "reboot": {
+        "name": "Reboot module"
+      },
+      "forget_radio": {
+        "name": "Remove sensor"
+      }
+    },
+    "number": {
+      "siren_minutes": {
+        "name": "Siren duration"
+      },
+      "valve_power_timeout": {
+        "name": "Valves power timeout"
+      },
+      "brightness": {
+        "name": "LED brightness"
+      },
+      "floor_wash_left": {
+        "name": "Floor wash time left"
+      },
+      "pulse_counter_value": {
+        "name": "Pulse counter value"
+      }
+    },
+    "select": {
+      "relay_mode": {
+        "name": "Relay mode",
+        "state": {
+          "off": "Not used",
+          "by_valves": "Follows valves",
+          "by_leak": "Follows leak",
+          "manual": "Manual"
+        }
+      },
+      "operating_mode": {
+        "name": "Operating mode",
+        "state": {
+          "normal": "Normal",
+          "add_radio": "Adding radio sensors",
+          "floor_wash": "Floor wash"
+        }
+      },
+      "wired_mode": {
+        "name": "Wired line {line} mode",
+        "state": {
+          "sensor": "Sensor",
+          "button": "Button",
+          "toggle": "Toggle switch",
+          "pulse_counter": "Pulse counter",
+          "unused": "Not used"
+        }
+      },
+      "pulse_step": {
+        "name": "Pulse counter step"
+      }
+    },
+    "sensor": {
+      "ups_charge": {
+        "name": "UPS charge"
+      },
+      "errors": {
+        "name": "Errors"
+      },
+      "firmware": {
+        "name": "Firmware version"
+      },
+      "hardware": {
+        "name": "Hardware version"
+      },
+      "wired_diff": {
+        "name": "Sensor count difference"
+      },
+      "pulse_counter": {
+        "name": "Pulse counter"
+      },
+      "valve_line": {
+        "name": "Valve line {line}",
+        "state": {
+          "feedback_off": "Feedback off",
+          "normal": "Normal",
+          "open_circuit": "Open circuit",
+          "short": "Short circuit",
+          "stuck": "Valve stuck",
+          "limit_timeout": "Limit switch not reached, power cut by timeout",
+          "not_connected": "Not connected or ground broken"
+        }
+      },
+      "last_success": {
+        "name": "Last successful poll"
+      },
+      "failures": {
+        "name": "Consecutive failed polls"
+      },
+      "timeouts": {
+        "name": "Request timeouts"
+      },
+      "exceptions": {
+        "name": "Modbus exceptions"
+      },
+      "radio_battery": {
+        "name": "Battery"
+      },
+      "radio_rssi": {
+        "name": "Signal level"
+      }
+    },
+    "switch": {
+      "valve_feedback": {
+        "name": "Valve line feedback"
+      },
+      "close_on_low_ups": {
+        "name": "Close valves on low UPS"
+      },
+      "close_on_sensor_loss": {
+        "name": "Close valves on sensor loss"
+      },
+      "child_lock": {
+        "name": "Child lock"
+      },
+      "button_led": {
+        "name": "Button backlight"
+      },
+      "relay": {
+        "name": "Relay"
+      },
+      "wired_feedback": {
+        "name": "Feedback"
+      }
+    },
+    "valve": {
+      "valves": {
+        "name": "Valves"
+      }
+    }
+  },
+  "exceptions": {
+    "write_failed": {
+      "message": "Cannot write to the module: {error}"
+    },
+    "entry_not_found": {
+      "message": "Specify config_entry_id: no unique Neptun entry found"
+    },
+    "confirm_required": {
+      "message": "Set confirm to true to proceed"
+    }
+  },
+  "issues": {
+    "no_connection": {
+      "title": "No connection to the Neptun module",
+      "description": "The module has not answered for over 5 minutes: {error}. Check the RS-485 wiring, the adapter and the module power."
+    }
+  },
+  "services": {
+    "factory_reset": {
+      "name": "Factory reset",
+      "description": "Resets the module to factory settings, including radio sensors and RS-485 parameters. The module may stop answering at the configured address.",
+      "fields": {
+        "confirm": {
+          "name": "Confirm",
+          "description": "Must be true"
+        },
+        "config_entry_id": {
+          "name": "Entry",
+          "description": "Optional if there is only one module"
+        }
+      }
+    },
+    "forget_radio_sensor": {
+      "name": "Remove radio sensor",
+      "description": "Removes a radio sensor from the module.",
+      "fields": {
+        "number": {
+          "name": "Sensor number",
+          "description": "11..60"
+        },
+        "config_entry_id": {
+          "name": "Entry",
+          "description": "Optional if there is only one module"
+        }
+      }
+    }
+  }
+}

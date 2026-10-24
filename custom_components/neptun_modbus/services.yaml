@@ -1,0 +1,27 @@
+factory_reset:
+  fields:
+    confirm:
+      required: true
+      default: false
+      selector:
+        boolean:
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: neptun_modbus
+
+forget_radio_sensor:
+  fields:
+    number:
+      required: true
+      selector:
+        number:
+          min: 11
+          max: 60
+          mode: box
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: neptun_modbus

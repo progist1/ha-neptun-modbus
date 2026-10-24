@@ -1,0 +1,24 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "siren_active": {"default": "mdi:bullhorn", "state": {"off": "mdi:bullhorn-outline"}}
+    },
+    "button": {
+      "reset_leak": {"default": "mdi:water-off"},
+      "mute_siren": {"default": "mdi:volume-off"},
+      "save_wired_count": {"default": "mdi:content-save"},
+      "forget_radio": {"default": "mdi:delete"}
+    },
+    "sensor": {
+      "valve_line": {"default": "mdi:pipe-valve"}
+    },
+    "switch": {
+      "child_lock": {"default": "mdi:lock", "state": {"off": "mdi:lock-open"}},
+      "button_led": {"default": "mdi:led-on", "state": {"off": "mdi:led-off"}}
+    }
+  },
+  "services": {
+    "factory_reset": {"service": "mdi:factory"},
+    "forget_radio_sensor": {"service": "mdi:delete"}
+  }
+}

@@ -1,0 +1,293 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Модуль Neptun",
+        "description": "RS-485 адаптер и Modbus-адрес модуля. Порт открывает только Home Assistant; 8N1.",
+        "data": {
+          "port": "Последовательный порт",
+          "slave": "Modbus-адрес",
+          "baudrate": "Скорость"
+        }
+      },
+      "reconfigure": {
+        "title": "Параметры подключения",
+        "description": "Меняет способ подключения Home Assistant к модулю; настройки самого модуля не затрагиваются.",
+        "data": {
+          "port": "Последовательный порт",
+          "slave": "Modbus-адрес",
+          "baudrate": "Скорость"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Не удаётся открыть порт или модуль не отвечает",
+      "timeout": "Модуль не ответил вовремя",
+      "permission": "Нет прав на последовательный порт",
+      "not_neptun": "Устройство не является модулем Neptun"
+    },
+    "abort": {
+      "already_configured": "Этот модуль уже настроен",
+      "reconfigure_successful": "Параметры подключения обновлены"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Опрос",
+        "data": {
+          "scan_interval": "Интервал опроса (с)",
+          "timeout": "Таймаут запроса (с)",
+          "retries": "Попыток на запрос",
+          "valve_lines": "Используемых линий кранов"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "leak": {
+        "name": "Протечка"
+      },
+      "siren_active": {
+        "name": "Сирена"
+      },
+      "valves_power": {
+        "name": "Питание кранов"
+      },
+      "ups_present": {
+        "name": "ИБП подключён"
+      },
+      "on_ups": {
+        "name": "Работа от ИБП"
+      },
+      "problem": {
+        "name": "Неисправность"
+      },
+      "connection": {
+        "name": "Связь с модулем"
+      },
+      "wired_line": {
+        "name": "Состояние"
+      },
+      "radio_leak": {
+        "name": "Протечка"
+      },
+      "radio_lost": {
+        "name": "Потерян"
+      },
+      "error_short_modules_power": {
+        "name": "КЗ по питанию модулей"
+      },
+      "error_short_wired_power": {
+        "name": "КЗ по питанию проводных датчиков"
+      },
+      "error_short_valves_power": {
+        "name": "КЗ по питанию кранов"
+      },
+      "error_valves_stuck": {
+        "name": "Закисание кранов"
+      },
+      "error_lora_unavailable": {
+        "name": "Недоступен чип LoRa"
+      },
+      "error_eeprom_unavailable": {
+        "name": "Недоступна EEPROM"
+      },
+      "error_ups_low": {
+        "name": "Низкий заряд ИБП"
+      }
+    },
+    "button": {
+      "reset_leak": {
+        "name": "Сбросить протечку"
+      },
+      "mute_siren": {
+        "name": "Выключить сирену"
+      },
+      "save_wired_count": {
+        "name": "Запомнить число датчиков"
+      },
+      "reboot": {
+        "name": "Перезагрузить модуль"
+      },
+      "forget_radio": {
+        "name": "Удалить датчик"
+      }
+    },
+    "number": {
+      "siren_minutes": {
+        "name": "Время сирены"
+      },
+      "valve_power_timeout": {
+        "name": "Таймаут питания кранов"
+      },
+      "brightness": {
+        "name": "Яркость светодиодов"
+      },
+      "floor_wash_left": {
+        "name": "Осталось времени мойки пола"
+      },
+      "pulse_counter_value": {
+        "name": "Значение импульсного счётчика"
+      }
+    },
+    "select": {
+      "relay_mode": {
+        "name": "Режим реле",
+        "state": {
+          "off": "Не задействовано",
+          "by_valves": "По состоянию кранов",
+          "by_leak": "По статусу протечки",
+          "manual": "Ручное управление"
+        }
+      },
+      "operating_mode": {
+        "name": "Режим работы",
+        "state": {
+          "normal": "Рабочий",
+          "add_radio": "Добавление радиодатчиков",
+          "floor_wash": "Мойка пола"
+        }
+      },
+      "wired_mode": {
+        "name": "Режим проводной линии {line}",
+        "state": {
+          "sensor": "Датчик",
+          "button": "Кнопка без фиксации",
+          "toggle": "Кнопка с фиксацией, тумблер",
+          "pulse_counter": "Импульсный счётчик",
+          "unused": "Не используется"
+        }
+      },
+      "pulse_step": {
+        "name": "Шаг импульсного счётчика"
+      }
+    },
+    "sensor": {
+      "ups_charge": {
+        "name": "Заряд ИБП"
+      },
+      "errors": {
+        "name": "Ошибки"
+      },
+      "firmware": {
+        "name": "Версия ПО"
+      },
+      "hardware": {
+        "name": "Аппаратная версия"
+      },
+      "wired_diff": {
+        "name": "Расхождение числа датчиков"
+      },
+      "pulse_counter": {
+        "name": "Импульсный счётчик"
+      },
+      "valve_line": {
+        "name": "Линия кранов {line}",
+        "state": {
+          "feedback_off": "Обратная связь выключена",
+          "normal": "Норма",
+          "open_circuit": "Обрыв линии",
+          "short": "Короткое замыкание",
+          "stuck": "Закисание крана",
+          "limit_timeout": "Концевик не сработал, питание снято по таймауту",
+          "not_connected": "Краны не подключены или обрыв по земле"
+        }
+      },
+      "last_success": {
+        "name": "Последний успешный опрос"
+      },
+      "failures": {
+        "name": "Подряд неудачных опросов"
+      },
+      "timeouts": {
+        "name": "Таймауты запросов"
+      },
+      "exceptions": {
+        "name": "Ответы с ошибкой Modbus"
+      },
+      "radio_battery": {
+        "name": "Батарея"
+      },
+      "radio_rssi": {
+        "name": "Уровень сигнала"
+      }
+    },
+    "switch": {
+      "valve_feedback": {
+        "name": "Обратная связь по кранам"
+      },
+      "close_on_low_ups": {
+        "name": "Закрывать краны при низком заряде ИБП"
+      },
+      "close_on_sensor_loss": {
+        "name": "Закрывать краны при потере датчика"
+      },
+      "child_lock": {
+        "name": "Защита от детей"
+      },
+      "button_led": {
+        "name": "Подсветка кнопок"
+      },
+      "relay": {
+        "name": "Реле"
+      },
+      "wired_feedback": {
+        "name": "Обратная связь"
+      }
+    },
+    "valve": {
+      "valves": {
+        "name": "Краны"
+      }
+    }
+  },
+  "exceptions": {
+    "write_failed": {
+      "message": "Не удалось записать в модуль: {error}"
+    },
+    "entry_not_found": {
+      "message": "Укажите config_entry_id: единственная запись Neptun не найдена"
+    },
+    "confirm_required": {
+      "message": "Для выполнения установите confirm в true"
+    }
+  },
+  "issues": {
+    "no_connection": {
+      "title": "Нет связи с модулем Neptun",
+      "description": "Модуль не отвечает более 5 минут: {error}. Проверьте проводку RS-485, адаптер и питание модуля."
+    }
+  },
+  "services": {
+    "factory_reset": {
+      "name": "Сброс до заводских настроек",
+      "description": "Сбрасывает модуль до заводских настроек, включая радиодатчики и параметры RS-485. Модуль может перестать отвечать по настроенному адресу.",
+      "fields": {
+        "confirm": {
+          "name": "Подтверждение",
+          "description": "Должно быть true"
+        },
+        "config_entry_id": {
+          "name": "Запись",
+          "description": "Не нужно, если модуль один"
+        }
+      }
+    },
+    "forget_radio_sensor": {
+      "name": "Удалить радиодатчик",
+      "description": "Удаляет радиодатчик из модуля.",
+      "fields": {
+        "number": {
+          "name": "Номер датчика",
+          "description": "11..60"
+        },
+        "config_entry_id": {
+          "name": "Запись",
+          "description": "Не нужно, если модуль один"
+        }
+      }
+    }
+  }
+}

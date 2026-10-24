@@ -1,0 +1,13 @@
+image: python:3.14
+
+stages: [test]
+
+test:
+  stage: test
+  before_script:
+    - python -m venv .venv
+    - .venv/bin/pip install -q -r requirements_test.txt
+  script:
+    - .venv/bin/ruff check .
+    - .venv/bin/ruff format --check .
+    - .venv/bin/python -m pytest -q
