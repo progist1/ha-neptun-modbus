@@ -4,6 +4,8 @@ stages: [test]
 
 test:
   stage: test
+  tags:
+    - k8s
   before_script:
     - python -m venv .venv
     - .venv/bin/pip install -q -r requirements_test.txt
