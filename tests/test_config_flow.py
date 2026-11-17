@@ -129,3 +129,10 @@ async def test_address_from_selector_is_stored_as_int(hass, module):
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert isinstance(result["data"][CONF_SLAVE], int)
     assert result["result"].unique_id == "/dev/ttyUSB0:1"
+
+
+def test_socket_port_skips_file_checks(monkeypatch):
+    url = "socket://neptun-serial.apps.svc.cluster.local:4001"
+    assert config_flow._is_socket(url)
+    assert not config_flow._is_socket("/dev/ttyUSB0")
+    assert config_flow._port_id(url) == url

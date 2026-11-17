@@ -51,7 +51,18 @@ def _list_ports() -> list[str]:
     return ports
 
 
+def _is_socket(port: str) -> bool:
+    """A serial-over-TCP bridge (ser2net, socat): pyserial opens it as socket://host:port."""
+    return port.startswith("socket://")
+
+
+def _port_id(port: str) -> str:
+    return port if _is_socket(port) else os.path.realpath(port)
+
+
 def _port_error(port: str) -> str | None:
+    if _is_socket(port):
+        return None
     if not os.path.exists(port):
         return "cannot_connect"
     if not os.access(port, os.R_OK | os.W_OK):
@@ -114,7 +125,7 @@ class NeptunConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             user_input = _normalize(user_input)
-            real = await self.hass.async_add_executor_job(os.path.realpath, user_input[CONF_PORT])
+            real = await self.hass.async_add_executor_job(_port_id, user_input[CONF_PORT])
             await self.async_set_unique_id(f"{real}:{user_input[CONF_SLAVE]}")
             self._abort_if_unique_id_configured()
             if (error := await _validate(self.hass, user_input)) is None:
@@ -144,9 +155,7 @@ class NeptunConfigFlow(ConfigFlow, domain=DOMAIN):
                 if runtime is not None:
                     runtime.client.resume()
             if error is None:
-                real = await self.hass.async_add_executor_job(
-                    os.path.realpath, user_input[CONF_PORT]
-                )
+                real = await self.hass.async_add_executor_job(_port_id, user_input[CONF_PORT])
                 return self.async_update_reload_and_abort(
                     entry,
                     unique_id=f"{real}:{user_input[CONF_SLAVE]}",
