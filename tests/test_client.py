@@ -111,3 +111,12 @@ async def test_no_sleep_after_last_attempt(client, module, monkeypatch):
     with pytest.raises(NeptunTimeoutError):
         await client.read_coils(0, 1)
     assert len(sleeps) == 2  # 3 attempts -> pauses only between them
+
+
+async def test_socket_url_uses_async_tcp_rtu_client():
+    from pymodbus.client import AsyncModbusTcpClient
+
+    client = NeptunClient("socket://neptun-serial.apps.svc.cluster.local:4001", 1, 9600)
+    assert isinstance(client._client, AsyncModbusTcpClient)
+    assert client._client.comm_params.host == "neptun-serial.apps.svc.cluster.local"
+    assert client._client.comm_params.port == 4001

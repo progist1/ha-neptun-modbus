@@ -8,8 +8,9 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any
 
-from pymodbus.client import AsyncModbusSerialClient
+from pymodbus.client import AsyncModbusSerialClient, AsyncModbusTcpClient
 from pymodbus.exceptions import ConnectionException, ModbusException, ModbusIOException
+from pymodbus.framer import FramerType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -55,17 +56,29 @@ class NeptunClient:
         self._port = port
         self._slave = slave
         self._retries = max(1, int(retries))
-        factory = client_factory or AsyncModbusSerialClient
         # pymodbus own retries are disabled, we retry (and count) ourselves
-        self._client = factory(
-            port,
-            baudrate=baudrate,
-            bytesize=8,
-            parity="N",
-            stopbits=1,
-            timeout=timeout,
-            retries=0,
-        )
+        if client_factory is None and port.startswith("socket://"):
+            # serial-over-TCP bridge (ser2net, socat): pyserial's socket:// blocks the event loop
+            # (sleep in close()), so talk RTU-over-TCP with the native async client instead
+            host, _, tcp_port = port.removeprefix("socket://").rpartition(":")
+            self._client = AsyncModbusTcpClient(
+                host,
+                port=int(tcp_port),
+                framer=FramerType.RTU,
+                timeout=timeout,
+                retries=0,
+            )
+        else:
+            factory = client_factory or AsyncModbusSerialClient
+            self._client = factory(
+                port,
+                baudrate=baudrate,
+                bytesize=8,
+                parity="N",
+                stopbits=1,
+                timeout=timeout,
+                retries=0,
+            )
         self._lock = asyncio.Lock()
         self._paused = False
         self.stats = ClientStats()
